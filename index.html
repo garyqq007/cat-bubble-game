@@ -281,9 +281,18 @@ function tickFx(){fxctx.clearRect(0,0,W,H);fxList=fxList.filter(fx=>{fx.life--;i
 
 // ── GAME ──
 const COLS=9,ROWS=9;
-function R(){return Math.max(12,Math.round(W/21));}
+// R is computed so that ROWS rows + launcher fits exactly in canvas height
+// height used by grid = ROWS * ROW_H = ROWS * R*1.74
+// launcher takes ~R*2.4 at the bottom, top padding ~R*0.5
+// So: ROWS*R*1.74 + R*2.4 + R*0.5 = H  →  R = H / (ROWS*1.74 + 2.9)
+// Also cap by width so 9 columns fit: R_w = W / (COLS*2 + 1)
+function R(){
+  const rh = H / (ROWS * 1.74 + 2.9);
+  const rw = W / (COLS * 2 + 1);
+  return Math.max(10, Math.floor(Math.min(rh, rw)));
+}
 function ROW_H(){return R()*1.74;}
-function launchY(){return H-R()*1.2;}
+function launchY(){return H-R()*1.4;}
 const CCAT=['#f97316','#94a3b8','#d4a574','#1e293b','#c2782a','#e8ddd4'];
 const PE=['💣','🌈','⚡','🌀','✨'];
 const PC=[30,25,40,40,60];
@@ -292,7 +301,7 @@ let dailySpun=false;
 const TODAY=new Date().toDateString();
 try{dailySpun=localStorage&&localStorage.getItem('catbubble_spun')===TODAY;}catch(e){}
 
-function cxy(row,col){const off=(row%2===0)?0:R();return{x:R()+1+col*R()*2+off,y:Math.round(H*.03)+row*ROW_H()};}
+function cxy(row,col){const off=(row%2===0)?0:R();return{x:R()+1+col*R()*2+off,y:Math.round(R()*0.5)+row*ROW_H()};}
 function rndType(){return Math.floor(Math.random()*(level<3?4:6));}
 
 function initGame(){
